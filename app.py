@@ -15,25 +15,33 @@ CORS(app)
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
 app.config['ADMIN_USERNAME'] = os.getenv('ADMIN_USERNAME')
-app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD')  
+app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD')  # Change this!
 
-# MongoDB connection
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+# MongoDB connection (lazy initialization for serverless)
+MONGO_URI = os.getenv('MONGO_URI')
 DB_NAME = os.getenv('DB_NAME', 'invoice_dashboard')
+client = None
+db = None
+invoices_collection = None
+users_collection = None
 
-try:
-    client = MongoClient(MONGO_URI)
-    db = client[DB_NAME]
-    invoices_collection = db.invoices
-    users_collection = db.users
-    print("Connected to MongoDB successfully!")
-    
-    # Note: Admin credentials are stored in app.config, not in database
-    # This is a simple implementation. For production, consider using proper user management
-except Exception as e:
-    print(f"Error connecting to MongoDB: {e}")
-    invoices_collection = None
-    users_collection = None
+def ensure_db() -> bool:
+    global client, db, invoices_collection, users_collection
+    if invoices_collection is not None and users_collection is not None:
+        return True
+    try:
+        if not MONGO_URI:
+            print("MONGO_URI is not set.")
+            return False
+        client = MongoClient(MONGO_URI)
+        db = client[DB_NAME]
+        invoices_collection = db.invoices
+        users_collection = db.users
+        print("Connected to MongoDB successfully!")
+        return True
+    except Exception as e:
+        print(f"Error connecting to MongoDB: {e}")
+        return False
 
 
 def convert_mongo_document(doc):
@@ -84,6 +92,15 @@ def login_required(f):
     return decorated_function
 
 
+def require_db(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not ensure_db():
+            return jsonify({'success': False, 'error': 'Database not configured or unreachable. Set MONGO_URI and DB_NAME.'}), 500
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -120,6 +137,7 @@ def index():
 
 @app.route('/api/invoices', methods=['GET'])
 @login_required
+@require_db
 def get_invoices():
     try:
         # Get month filter from query params
@@ -176,6 +194,7 @@ def get_invoices():
 
 @app.route('/api/invoices', methods=['POST'])
 @login_required
+@require_db
 def create_invoice():
     try:
         if request.is_json:
@@ -222,6 +241,7 @@ def create_invoice():
 
 @app.route('/api/invoices/<invoice_id>', methods=['GET'])
 @login_required
+@require_db
 def get_invoice(invoice_id):
     try:
         invoice = invoices_collection.find_one({'_id': ObjectId(invoice_id)})
@@ -236,6 +256,7 @@ def get_invoice(invoice_id):
 
 @app.route('/api/invoices/<invoice_id>', methods=['PUT'])
 @login_required
+@require_db
 def update_invoice(invoice_id):
     try:
         # Handle both JSON and form data
@@ -283,6 +304,7 @@ def update_invoice(invoice_id):
 
 @app.route('/api/invoices/<invoice_id>', methods=['DELETE'])
 @login_required
+@require_db
 def delete_invoice(invoice_id):
     try:
         result = invoices_collection.delete_one({'_id': ObjectId(invoice_id)})
@@ -296,6 +318,7 @@ def delete_invoice(invoice_id):
 
 @app.route('/api/invoices/monthly', methods=['GET'])
 @login_required
+@require_db
 def get_monthly_invoices():
     try:
         # Get all invoices grouped by month
@@ -324,6 +347,7 @@ def get_monthly_invoices():
 
 @app.route('/api/invoices/export/csv', methods=['GET'])
 @login_required
+@require_db
 def export_invoices_csv():
     try:
         # Get month filter from query params if provided
