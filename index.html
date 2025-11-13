@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Dashboard - Indian Spices and Groceries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .search-box {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 300px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 20px auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s;
+            position: relative;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-header h2 {
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #2980b9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>🛒 Indian Spices and Groceries</h1>
+                    <p>Invoice Management Dashboard</p>
+                </div>
+                <button class="btn" onclick="window.location.href='/logout'" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white;">Logout</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <h3 id="totalInvoices">0</h3>
+                    <p>Total Invoices</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalAmount">$0</h3>
+                    <p>Total Amount</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="paidInvoices">0</h3>
+                    <p>Paid Invoices</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pendingInvoices">0</h3>
+                    <p>Pending Invoices</p>
+                </div>
+            </div>
+
+            <div class="actions">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="openModal()">+ Add New Invoice</button>
+                    <button class="btn btn-success" onclick="exportToCSV()">📥 Export to CSV</button>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select id="monthFilter" class="search-box" style="width: 150px;" onchange="filterByMonth()">
+                        <option value="">All Months</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <select id="yearFilter" class="search-box" style="width: 120px;" onchange="filterByMonth()">
+                        <option value="">All Years</option>
+                    </select>
+                    <input type="text" class="search-box" id="searchBox" placeholder="Search invoices..." onkeyup="filterInvoices()">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div id="loading" class="loading">Loading invoices...</div>
+                <table id="invoicesTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Client Name</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesBody">
+                    </tbody>
+                </table>
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <p>No invoices found. Click "Add New Invoice" to get started!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Add/Edit Invoice -->
+    <div id="invoiceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Invoice</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="invoiceForm" onsubmit="saveInvoice(event)">
+                <input type="hidden" id="invoiceId">
+                
+                <div class="form-group">
+                    <label for="invoiceNumber">Invoice Number *</label>
+                    <input type="text" id="invoiceNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="clientName">Client Name *</label>
+                    <input type="text" id="clientName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount ($) *</label>
+                    <input type="number" id="amount" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Status *</label>
+                    <select id="status" required>
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Invoice Date *</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentDueDate">Payment Due Date *</label>
+                    <input type="date" id="paymentDueDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn" onclick="closeModal()" style="background: #ccc;">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let invoices = [];
+        let allInvoices = [];
+        let editingInvoiceId = null;
+        let currentMonthFilter = '';
+        let currentYearFilter = '';
+
+        // Load invoices on page load
+        window.onload = function() {
+            populateYearFilter();
+            loadInvoices();
+        };
+
+        // Populate year filter with current year and previous years
+        function populateYearFilter() {
+            const yearSelect = document.getElementById('yearFilter');
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= currentYear - 5; i--) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // Format date to DD-MM-YYYY format
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return 'N/A';
+                
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
+            } catch (e) {
+                return 'N/A';
+            }
+        }
+
+        // Load invoices from API
+        async function loadInvoices() {
+            try {
+                let url = '/api/invoices';
+                if (currentMonthFilter && currentYearFilter) {
+                    url += `?month=${currentMonthFilter}&year=${currentYearFilter}`;
+                }
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (result.success) {
+                    allInvoices = result.data;
+                    invoices = result.data;
+                    displayInvoices(invoices);
+                    updateStats(invoices);
+                } else {
+                    alert('Error loading invoices: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading invoices');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Filter by month
+        function filterByMonth() {
+            currentMonthFilter = document.getElementById('monthFilter').value;
+            currentYearFilter = document.getElementById('yearFilter').value;
+            
+            // If month is selected but year is not, use current year
+            if (currentMonthFilter && !currentYearFilter) {
+                currentYearFilter = new Date().getFullYear().toString();
+                document.getElementById('yearFilter').value = currentYearFilter;
+            }
+            
+            // If year is selected but month is not, clear both (show all)
+            if (currentYearFilter && !currentMonthFilter) {
+                currentMonthFilter = '';
+                currentYearFilter = '';
+                document.getElementById('monthFilter').value = '';
+                document.getElementById('yearFilter').value = '';
+            }
+            
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('invoicesTable').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            
+            loadInvoices();
+        }
+
+        // Display invoices in table
+        function displayInvoices(invoiceList) {
+            const tbody = document.getElementById('invoicesBody');
+            const table = document.getElementById('invoicesTable');
+            const emptyState = document.getElementById('emptyState');
+
+            if (invoiceList.length === 0) {
+                table.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+
+            tbody.innerHTML = invoiceList.map(invoice => {
+                // Format dates in DD-MM-YYYY format
+                const date = formatDate(invoice.date || invoice.created_at);
+                const dueDate = formatDate(invoice.payment_due_date);
+                const amount = invoice.amount ? `$${parseFloat(invoice.amount).toFixed(2)}` : '$0.00';
+                const status = invoice.status || 'pending';
+                const statusClass = `badge-${status}`;
+                
+                // Check if overdue
+                let dueDateClass = '';
+                if (invoice.payment_due_date) {
+                    const due = new Date(invoice.payment_due_date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (due < today && status !== 'paid') {
+                        dueDateClass = ' style="color: #e74c3c; font-weight: bold;"';
+                    }
+                }
+
+                return `
+                    <tr>
+                        <td>${invoice.invoice_number || invoice.invoiceNumber || 'N/A'}</td>
+                        <td>${invoice.client_name || invoice.clientName || 'N/A'}</td>
+                        <td><strong>${amount}</strong></td>
+                        <td>${date}</td>
+                        <td${dueDateClass}>${dueDate}</td>
+                        <td><span class="badge ${statusClass}">${status.toUpperCase()}</span></td>
+                        <td>${invoice.description || '-'}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary btn-sm" onclick="editInvoice('${invoice._id}')">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteInvoice('${invoice._id}')">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Update statistics
+        function updateStats(invoiceList) {
+            const total = invoiceList.length;
+            const totalAmount = invoiceList.reduce((sum, inv) => sum + (parseFloat(inv.amount) || 0), 0);
+            const paid = invoiceList.filter(inv => (inv.status || '').toLowerCase() === 'paid').length;
+            const pending = invoiceList.filter(inv => (inv.status || '').toLowerCase() === 'pending').length;
+
+            document.getElementById('totalInvoices').textContent = total;
+            document.getElementById('totalAmount').textContent = '$' + totalAmount.toFixed(2);
+            document.getElementById('paidInvoices').textContent = paid;
+            document.getElementById('pendingInvoices').textContent = pending;
+        }
+
+        // Filter invoices
+        function filterInvoices() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = invoices.filter(invoice => {
+                const invoiceNum = (invoice.invoice_number || invoice.invoiceNumber || '').toLowerCase();
+                const clientName = (invoice.client_name || invoice.clientName || '').toLowerCase();
+                const description = (invoice.description || '').toLowerCase();
+                return invoiceNum.includes(searchTerm) || 
+                       clientName.includes(searchTerm) || 
+                       description.includes(searchTerm);
+            });
+            displayInvoices(filtered);
+            updateStats(filtered);
+        }
+
+        // Open modal for new invoice
+        function openModal() {
+            editingInvoiceId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Invoice';
+            document.getElementById('invoiceId').value = '';
+            
+            // Reset form first
+            document.getElementById('invoiceForm').reset();
+            
+            // Set dates after reset
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            
+            // Set due date to 30 days from today
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 30);
+            const dueDateStr = dueDate.toISOString().split('T')[0];
+            document.getElementById('paymentDueDate').value = dueDateStr;
+            
+            // Show modal and scroll to top
+            document.getElementById('invoiceModal').style.display = 'block';
+            document.getElementById('invoiceModal').scrollTop = 0;
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('invoiceModal').style.display = 'none';
+            editingInvoiceId = null;
+        }
+
+        // Edit invoice
+        async function editInvoice(id) {
+            const invoice = allInvoices.find(inv => inv._id === id) || invoices.find(inv => inv._id === id);
+            if (!invoice) return;
+
+            editingInvoiceId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Invoice';
+            document.getElementById('invoiceId').value = id;
+            document.getElementById('invoiceNumber').value = invoice.invoice_number || invoice.invoiceNumber || '';
+            document.getElementById('clientName').value = invoice.client_name || invoice.clientName || '';
+            document.getElementById('amount').value = invoice.amount || '';
+            document.getElementById('status').value = invoice.status || 'pending';
+            document.getElementById('description').value = invoice.description || '';
+            
+            if (invoice.date) {
+                const date = new Date(invoice.date);
+                document.getElementById('date').value = date.toISOString().split('T')[0];
+            } else if (invoice.created_at) {
+                document.getElementById('date').value = new Date(invoice.created_at).toISOString().split('T')[0];
+            }
+            
+            if (invoice.payment_due_date) {
+                const dueDate = new Date(invoice.payment_due_date);
+                document.getElementById('paymentDueDate').value = dueDate.toISOString().split('T')[0];
+            } else {
+                const dueDate = new Date();
+                dueDate.setDate(dueDate.getDate() + 30);
+                document.getElementById('paymentDueDate').value = dueDate.toISOString().split('T')[0];
+            }
+
+            document.getElementById('invoiceModal').style.display = 'block';
+        }
+
+        // Save invoice
+        async function saveInvoice(event) {
+            event.preventDefault();
+
+            const invoiceData = {
+                invoice_number: document.getElementById('invoiceNumber').value,
+                client_name: document.getElementById('clientName').value,
+                amount: document.getElementById('amount').value,
+                status: document.getElementById('status').value,
+                date: document.getElementById('date').value,
+                payment_due_date: document.getElementById('paymentDueDate').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                let response;
+                if (editingInvoiceId) {
+                    // Update existing invoice
+                    response = await fetch(`/api/invoices/${editingInvoiceId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(invoiceData)
+                    });
+                } else {
+                    // Create new invoice
+                    response = await fetch('/api/invoices', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(invoiceData)
+                    });
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeModal();
+                    loadInvoices();
+                } else {
+                    alert('Error saving invoice: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error saving invoice');
+            }
+        }
+
+        // Delete invoice
+        async function deleteInvoice(id) {
+            if (!confirm('Are you sure you want to delete this invoice?')) return;
+
+            try {
+                const response = await fetch(`/api/invoices/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    loadInvoices();
+                } else {
+                    alert('Error deleting invoice: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting invoice');
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('invoiceModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Export invoices to CSV
+        function exportToCSV() {
+            try {
+                // Get current filters
+                const monthFilter = document.getElementById('monthFilter').value;
+                const yearFilter = document.getElementById('yearFilter').value;
+                
+                // Build URL with filters
+                let url = '/api/invoices/export/csv';
+                if (monthFilter && yearFilter) {
+                    url += `?month=${monthFilter}&year=${yearFilter}`;
+                }
+                
+                // Create a temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'invoices_export.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('Error exporting CSV:', error);
+                alert('Error exporting CSV file');
+            }
+        }
+    </script>
+</body>
+</html>
+
