@@ -9,13 +9,13 @@ from functools import wraps
 import csv
 import io
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
-app.config['ADMIN_USERNAME'] = os.getenv('ADMIN_USERNAME', 'admin')
-app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD', 'admin123')  # Change this!
+app.config['ADMIN_USERNAME'] = os.getenv('ADMIN_USERNAME')
+app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD')  
 
 # MongoDB connection
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
