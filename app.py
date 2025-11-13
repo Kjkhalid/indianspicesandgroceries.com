@@ -101,6 +101,17 @@ def require_db(f):
     return decorated_function
 
 
+# Favicon handlers (serve from /static)
+@app.route('/favicon.ico')
+def favicon_ico():
+    return redirect(url_for('static', filename='favicon.ico'))
+
+
+@app.route('/favicon.png')
+def favicon_png():
+    return redirect(url_for('static', filename='favicon.png'))
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
