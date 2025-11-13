@@ -13,13 +13,13 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 
 # Configuration
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['ADMIN_USERNAME'] = os.getenv('ADMIN_USERNAME')
 app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD')  # Change this!
 
 # MongoDB connection (lazy initialization for serverless)
 MONGO_URI = os.getenv('MONGO_URI')
-DB_NAME = os.getenv('DB_NAME', 'invoice_dashboard')
+DB_NAME = os.getenv('DB_NAME')
 client = None
 db = None
 invoices_collection = None
@@ -493,4 +493,5 @@ else:
     # For Vercel/production deployment
     # Vercel will use this as the WSGI application
     pass
+
 
