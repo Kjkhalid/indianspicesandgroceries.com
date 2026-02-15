@@ -392,6 +392,12 @@
                     <select id="yearFilter" class="search-box" style="width: 120px;" onchange="filterByMonth()">
                         <option value="">All Years</option>
                     </select>
+                    <select id="statusFilter" class="search-box" style="width: 150px;" onchange="filterByMonth()">
+                        <option value="">All Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
                     <input type="text" class="search-box" id="searchBox" placeholder="Search invoices..." onkeyup="filterInvoices()">
                 </div>
             </div>
@@ -484,6 +490,7 @@
         let editingInvoiceId = null;
         let currentMonthFilter = '';
         let currentYearFilter = '';
+        let currentStatusFilter = '';
 
         // Load invoices on page load
         window.onload = function() {
@@ -523,8 +530,18 @@
         async function loadInvoices() {
             try {
                 let url = '/api/invoices';
+                const params = [];
+                
                 if (currentMonthFilter && currentYearFilter) {
-                    url += `?month=${currentMonthFilter}&year=${currentYearFilter}`;
+                    params.push(`month=${currentMonthFilter}&year=${currentYearFilter}`);
+                }
+                
+                if (currentStatusFilter) {
+                    params.push(`status=${currentStatusFilter}`);
+                }
+                
+                if (params.length > 0) {
+                    url += '?' + params.join('&');
                 }
                 
                 const response = await fetch(url);
@@ -550,6 +567,7 @@
         function filterByMonth() {
             currentMonthFilter = document.getElementById('monthFilter').value;
             currentYearFilter = document.getElementById('yearFilter').value;
+            currentStatusFilter = document.getElementById('statusFilter').value;
             
             // If month is selected but year is not, use current year
             if (currentMonthFilter && !currentYearFilter) {
