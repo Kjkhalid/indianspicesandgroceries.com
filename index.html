@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Dashboard - Indian Spices and Groceries</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/favicon.png">
     <style>
         * {
             margin: 0;
@@ -387,17 +389,18 @@
                         <option value="11">November</option>
                         <option value="12">December</option>
                     </select>
-                   <select id="yearFilter" class="search-box" style="width: 120px;" onchange="filterByMonth()">
-                            <option value="">All Years</option>
-                        </select>
-                        <!-- ADD THIS NEW STATUS FILTER -->
-                        <select id="statusFilter" class="search-box" style="width: 150px;" onchange="filterByMonth()">
-                            <option value="">All Status</option>
-                            <option value="paid">Paid</option>
-                            <option value="pending">Pending</option>
-                            <option value="overdue">Overdue</option>
-                        </select>
-                        <input type="text" class="search-box" id="searchBox" placeholder="Search invoices..." onkeyup="filterInvoices()">
+                    <select id="yearFilter" class="search-box" style="width: 120px;" onchange="filterByMonth()">
+                        <option value="">All Years</option>
+                    </select>
+                    <select id="statusFilter" class="search-box" style="width: 150px;" onchange="filterByMonth()">
+                        <option value="">All Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                    <input type="text" class="search-box" id="searchBox" placeholder="Search invoices..." onkeyup="filterInvoices()">
+                </div>
+            </div>
 
             <div class="table-container">
                 <div id="loading" class="loading">Loading invoices...</div>
@@ -523,71 +526,70 @@
             }
         }
 
-       // Load invoices from API
-async function loadInvoices() {
-    try {
-        let url = '/api/invoices';
-        const params = [];
-        
-        if (currentMonthFilter && currentYearFilter) {
-            params.push(`month=${currentMonthFilter}&year=${currentYearFilter}`);
+        // Load invoices from API
+        async function loadInvoices() {
+            try {
+                let url = '/api/invoices';
+                const params = [];
+                
+                if (currentMonthFilter && currentYearFilter) {
+                    params.push(`month=${currentMonthFilter}&year=${currentYearFilter}`);
+                }
+                
+                if (currentStatusFilter) {
+                    params.push(`status=${currentStatusFilter}`);
+                }
+                
+                if (params.length > 0) {
+                    url += '?' + params.join('&');
+                }
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (result.success) {
+                    allInvoices = result.data;
+                    invoices = result.data;
+                    displayInvoices(invoices);
+                    updateStats(invoices);
+                } else {
+                    alert('Error loading invoices: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading invoices');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
         }
-        
-        // ADD THIS BLOCK
-        if (currentStatusFilter) {
-            params.push(`status=${currentStatusFilter}`);
-        }
-        
-        if (params.length > 0) {
-            url += '?' + params.join('&');
-        }
-        
-        const response = await fetch(url);
-        const result = await response.json();
-        
-        if (result.success) {
-            allInvoices = result.data;
-            invoices = result.data;
-            displayInvoices(invoices);
-            updateStats(invoices);
-        } else {
-            alert('Error loading invoices: ' + result.error);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error loading invoices');
-    } finally {
-        document.getElementById('loading').style.display = 'none';
-    }
-}
 
-       // Filter by month
-function filterByMonth() {
-    currentMonthFilter = document.getElementById('monthFilter').value;
-    currentYearFilter = document.getElementById('yearFilter').value;
-    currentStatusFilter = document.getElementById('statusFilter').value;  // ADD THIS LINE
-    
-    // If month is selected but year is not, use current year
-    if (currentMonthFilter && !currentYearFilter) {
-        currentYearFilter = new Date().getFullYear().toString();
-        document.getElementById('yearFilter').value = currentYearFilter;
-    }
-    
-    // If year is selected but month is not, clear both (show all)
-    if (currentYearFilter && !currentMonthFilter) {
-        currentMonthFilter = '';
-        currentYearFilter = '';
-        document.getElementById('monthFilter').value = '';
-        document.getElementById('yearFilter').value = '';
-    }
-    
-    // Show loading state
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('invoicesTable').style.display = 'none';
-    document.getElementById('emptyState').style.display = 'none';
-    
-    loadInvoices();
-}
+        // Filter by month
+        function filterByMonth() {
+            currentMonthFilter = document.getElementById('monthFilter').value;
+            currentYearFilter = document.getElementById('yearFilter').value;
+            currentStatusFilter = document.getElementById('statusFilter').value;
+            
+            // If month is selected but year is not, use current year
+            if (currentMonthFilter && !currentYearFilter) {
+                currentYearFilter = new Date().getFullYear().toString();
+                document.getElementById('yearFilter').value = currentYearFilter;
+            }
+            
+            // If year is selected but month is not, clear both (show all)
+            if (currentYearFilter && !currentMonthFilter) {
+                currentMonthFilter = '';
+                currentYearFilter = '';
+                document.getElementById('monthFilter').value = '';
+                document.getElementById('yearFilter').value = '';
+            }
+            
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('invoicesTable').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            
+            loadInvoices();
+        }
 
         // Display invoices in table
         function displayInvoices(invoiceList) {
@@ -837,8 +839,4 @@ function filterByMonth() {
     </script>
 </body>
 </html>
-
-
-
-
 
