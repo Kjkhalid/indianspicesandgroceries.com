@@ -193,6 +193,19 @@ def get_invoices():
                 import traceback
                 traceback.print_exc()
                 pass
+        # Status filtering
+        if status_filter:
+            if status_filter == 'overdue':
+                # Overdue: past due date AND not paid
+                today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                query['$and'] = query.get('$and', [])
+                query['$and'].extend([
+                    {'payment_due_date': {'$lt': today}},
+                    {'status': {'$ne': 'paid'}}
+                ])
+            else:
+                # Paid or pending
+                query['status'] = status_filter
         
         invoices = list(invoices_collection.find(query).sort('created_at', -1))
 
@@ -493,5 +506,6 @@ else:
     # For Vercel/production deployment
     # Vercel will use this as the WSGI application
     pass
+
 
 
