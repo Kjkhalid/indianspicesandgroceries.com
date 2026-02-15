@@ -388,16 +388,16 @@
                         <option value="12">December</option>
                     </select>
                    <select id="yearFilter" class="search-box" style="width: 120px;" onchange="filterByMonth()">
-    <option value="">All Years</option>
-</select>
-<!-- ADD THIS NEW STATUS FILTER -->
-<select id="statusFilter" class="search-box" style="width: 150px;" onchange="filterByMonth()">
-    <option value="">All Status</option>
-    <option value="paid">Paid</option>
-    <option value="pending">Pending</option>
-    <option value="overdue">Overdue</option>
-</select>
-<input type="text" class="search-box" id="searchBox" placeholder="Search invoices..." onkeyup="filterInvoices()">
+                            <option value="">All Years</option>
+                        </select>
+                        <!-- ADD THIS NEW STATUS FILTER -->
+                        <select id="statusFilter" class="search-box" style="width: 150px;" onchange="filterByMonth()">
+                            <option value="">All Status</option>
+                            <option value="paid">Paid</option>
+                            <option value="pending">Pending</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                        <input type="text" class="search-box" id="searchBox" placeholder="Search invoices..." onkeyup="filterInvoices()">
 
             <div class="table-container">
                 <div id="loading" class="loading">Loading invoices...</div>
@@ -837,6 +837,7 @@ function filterByMonth() {
     </script>
 </body>
 </html>
+
 
 
 
