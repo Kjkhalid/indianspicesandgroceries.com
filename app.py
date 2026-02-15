@@ -151,11 +151,14 @@ def index():
 @require_db
 def get_invoices():
     try:
-        # Get month filter from query params
+        # Get filters from query params
         month_filter = request.args.get('month')
         year_filter = request.args.get('year')
+        status_filter = request.args.get('status')  # NEW: status filter
         
         query = {}
+        
+        # Date filtering
         if month_filter and year_filter:
             try:
                 month = int(month_filter)
@@ -167,9 +170,7 @@ def get_invoices():
                     end_date = datetime(year, month + 1, 1)
                 
                 # Query for invoices where date field matches the month/year
-                # Primary: check the 'date' field
-                # Fallback: check 'created_at' if 'date' doesn't exist
-                query = {
+                date_query = {
                     '$or': [
                         {
                             'date': {
@@ -188,17 +189,20 @@ def get_invoices():
                         }
                     ]
                 }
+                query.update(date_query)
             except Exception as e:
                 print(f"Error in date filtering: {e}")
                 import traceback
                 traceback.print_exc()
                 pass
-        # Status filtering
+        
+        # NEW: Status filtering
         if status_filter:
             if status_filter == 'overdue':
                 # Overdue: past due date AND not paid
                 today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-                query['$and'] = query.get('$and', [])
+                if '$and' not in query:
+                    query['$and'] = []
                 query['$and'].extend([
                     {'payment_due_date': {'$lt': today}},
                     {'status': {'$ne': 'paid'}}
@@ -214,6 +218,7 @@ def get_invoices():
         return jsonify({'success': True, 'data': invoices_json}), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+        
 
 
 @app.route('/api/invoices', methods=['POST'])
@@ -506,6 +511,7 @@ else:
     # For Vercel/production deployment
     # Vercel will use this as the WSGI application
     pass
+
 
 
 
