@@ -13,7 +13,7 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 
 # Configuration
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
 app.config['ADMIN_USERNAME'] = os.getenv('ADMIN_USERNAME')
 app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD')  # Change this!
 
@@ -154,7 +154,7 @@ def get_invoices():
         # Get filters from query params
         month_filter = request.args.get('month')
         year_filter = request.args.get('year')
-        status_filter = request.args.get('status')  # NEW: status filter
+        status_filter = request.args.get('status')  # Status filter
         
         query = {}
         
@@ -196,7 +196,7 @@ def get_invoices():
                 traceback.print_exc()
                 pass
         
-        # NEW: Status filtering
+        # Status filtering
         if status_filter:
             if status_filter == 'overdue':
                 # Overdue: past due date AND not paid
@@ -218,7 +218,6 @@ def get_invoices():
         return jsonify({'success': True, 'data': invoices_json}), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
-        
 
 
 @app.route('/api/invoices', methods=['POST'])
@@ -511,7 +510,4 @@ else:
     # For Vercel/production deployment
     # Vercel will use this as the WSGI application
     pass
-
-
-
 
